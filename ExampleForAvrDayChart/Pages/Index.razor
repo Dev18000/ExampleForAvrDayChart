@@ -28,7 +28,7 @@
 else
 {
     //try use DayOfWeek for group by days...
-@*    <SfChart Title="Some title" Height="250">
+    @*    <SfChart Title="Some title" Height="250">
         <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category" Interval="8"></ChartPrimaryXAxis>
         <ChartTooltipSettings Enable="true">
         </ChartTooltipSettings>
@@ -39,13 +39,19 @@ else
     </SfChart>*@
 
     <SfChart Title="Some title" Height="250">
-        <ChartPrimaryXAxis Format="d" ValueType="Syncfusion.Blazor.Charts.ValueType.Category" EdgeLabelPlacement="EdgeLabelPlacement.Shift"
-                           LabelIntersectAction="LabelIntersectAction.Hide" Interval="8">
-    </ChartPrimaryXAxis>
+        <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category" EdgeLabelPlacement="EdgeLabelPlacement.Shift">
+
+        </ChartPrimaryXAxis>
         <ChartTooltipSettings Enable="true">
         </ChartTooltipSettings>
         <ChartSeriesCollection>
             <ChartSeries DataSource="@chart1" XName="DayOfWeekValue" YName="YNameValue" Type="ChartSeriesType.Line" Fill="#8A2336">
+                <ChartMarker>
+                    <ChartDataLabel Visible="true" Position="Syncfusion.Blazor.Charts.LabelPosition.Top">
+                        <ChartDataLabelFont FontWeight="800" Color="#142147"></ChartDataLabelFont>
+                    </ChartDataLabel>
+                </ChartMarker>
+                <ChartCornerRadius TopLeft="8" TopRight="8"></ChartCornerRadius>
             </ChartSeries>
         </ChartSeriesCollection>
     </SfChart>
@@ -173,8 +179,6 @@ else
                                           YNameValue = ChartData.Sum(x => x.YNameValue),
                                       };
             chart1 = groupTotalByDay.ToList();
-
-            var dayOfWeek = weighsModels.Select(d => d.DayOfWeekValue);
         }
         this.StateHasChanged();
     }
