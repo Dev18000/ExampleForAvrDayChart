@@ -1,0 +1,241 @@
+﻿@page "/"
+
+@using Microsoft.AspNetCore.Components;
+@using Syncfusion.Blazor.Calendars;
+@using Syncfusion.Blazor.Charts;
+@using Syncfusion.Blazor.DropDowns;
+@using Syncfusion.Blazor.Popups;
+@using System.Globalization;
+@using System.Text.Json;
+@using ExampleForAvrDayChart.Services
+
+<div style="margin-top:8px;">
+    <SfDatePicker @ref="DateObj" TValue="DateTime?" Value="DateValue" Width="150px" Min="DateMin" Max="DateMax">
+        <DatePickerEvents TValue="DateTime?" ValueChange="ValueChangeHandlerAsync"></DatePickerEvents>
+    </SfDatePicker>
+</div>
+
+<div style="margin-top:8px;display:flex;">
+    <SfDateRangePicker @ref="DateObjStat" TValue="DateTime?" Placeholder="Choisissez une periode" ShowClearButton="true" Width="250px" Min="DateMin" Max="DateMax">
+        <DateRangePickerEvents TValue="DateTime?" Blur="BlurHandlerAsync" RangeSelected="RangeSelectHandler" Focus="FocusHandler"></DateRangePickerEvents>
+    </SfDateRangePicker>
+</div>
+
+@if (chart1 == null)
+{
+    <div class="chartloader"></div>
+}
+else
+{
+    //try use DayOfWeek for group by days...
+@*    <SfChart Title="Some title" Height="250">
+        <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category" Interval="8"></ChartPrimaryXAxis>
+        <ChartTooltipSettings Enable="true">
+        </ChartTooltipSettings>
+        <ChartSeriesCollection>
+            <ChartSeries DataSource="@chart1" XName="DayOfWeekValue" YName="YNameValue" Type="ChartSeriesType.Line" Fill="#8A2336">
+            </ChartSeries>
+        </ChartSeriesCollection>
+    </SfChart>*@
+
+    <SfChart Title="Some title" Height="250">
+        <ChartPrimaryXAxis Format="d" ValueType="Syncfusion.Blazor.Charts.ValueType.Category" EdgeLabelPlacement="EdgeLabelPlacement.Shift"
+                           LabelIntersectAction="LabelIntersectAction.Hide" Interval="8">
+    </ChartPrimaryXAxis>
+        <ChartTooltipSettings Enable="true">
+        </ChartTooltipSettings>
+        <ChartSeriesCollection>
+            <ChartSeries DataSource="@chart1" XName="DayOfWeekValue" YName="YNameValue" Type="ChartSeriesType.Line" Fill="#8A2336">
+            </ChartSeries>
+        </ChartSeriesCollection>
+    </SfChart>
+}
+
+@code {
+    #region property
+    public DateTime? MinDate { get; set; }
+    public DateTime? MaxDate { get; set; }
+
+    IEnumerable<ModelChart>? chart1;
+    IEnumerable<ModelChart>? weighsModels;
+
+    SfDateRangePicker<DateTime?> DateObjStat;
+    SfDatePicker<DateTime?> DateObj;
+
+    public static DateTime DateMin { get; set; } = new DateTime(2022, 5, 29).AddDays(-90);
+    public static DateTime DateMax { get; set; } = new DateTime(2022, 5, 29);
+    public DateTime? DateValue { get; set; } = new DateTime(2022, 5, 29);
+
+    public Boolean isOpen { get; set; } = false;
+    #endregion
+
+    protected override async Task OnInitializedAsync()
+    {
+        weighsModels = new List<ModelChart>
+        {
+            new ModelChart{ date = new DateTime(2022,05,16), YNameValue = 10, }, //monday
+            new ModelChart{ date = new DateTime(2022,05,16), YNameValue = 5, },
+            new ModelChart{ date = new DateTime(2022,05,16), YNameValue = 5, },
+            new ModelChart{ date = new DateTime(2022,05,16), YNameValue = 3, }, //23
+            new ModelChart{ date = new DateTime(2022,05,17), YNameValue = 1, },
+            new ModelChart{ date = new DateTime(2022,05,17), YNameValue = 2, },
+            new ModelChart{ date = new DateTime(2022,05,17), YNameValue = 3, }, //6
+            new ModelChart{ date = new DateTime(2022,05,18), YNameValue = 10, },
+            new ModelChart{ date = new DateTime(2022,05,18), YNameValue = 4, },
+            new ModelChart{ date = new DateTime(2022,05,18), YNameValue = 3, },
+            new ModelChart{ date = new DateTime(2022,05,18), YNameValue = 3, },
+            new ModelChart{ date = new DateTime(2022,05,18), YNameValue = 1, },
+            new ModelChart{ date = new DateTime(2022,05,18), YNameValue = 9, },
+            new ModelChart{ date = new DateTime(2022,05,18), YNameValue = 10, }, //40
+            new ModelChart{ date = new DateTime(2022,05,19), YNameValue = 2, },
+            new ModelChart{ date = new DateTime(2022,05,19), YNameValue = 8, },
+            new ModelChart{ date = new DateTime(2022,05,19), YNameValue = 6, },
+            new ModelChart{ date = new DateTime(2022,05,19), YNameValue = 4, },
+            new ModelChart{ date = new DateTime(2022,05,19), YNameValue = 3, },
+            new ModelChart{ date = new DateTime(2022,05,19), YNameValue = 7, }, //30
+            new ModelChart{ date = new DateTime(2022,05,20), YNameValue = 3, },
+            new ModelChart{ date = new DateTime(2022,05,20), YNameValue = 2, },
+            new ModelChart{ date = new DateTime(2022,05,20), YNameValue = 1, },
+            new ModelChart{ date = new DateTime(2022,05,20), YNameValue = 7, },
+            new ModelChart{ date = new DateTime(2022,05,20), YNameValue = 4, },
+            new ModelChart{ date = new DateTime(2022,05,20), YNameValue = 7, },
+            new ModelChart{ date = new DateTime(2022,05,20), YNameValue = 13, },
+            new ModelChart{ date = new DateTime(2022,05,20), YNameValue = 10, },
+            new ModelChart{ date = new DateTime(2022,05,20), YNameValue = 6, }, //53
+            new ModelChart{ date = new DateTime(2022,05,21), YNameValue = 4, },
+            new ModelChart{ date = new DateTime(2022,05,21), YNameValue = 11, },
+            new ModelChart{ date = new DateTime(2022,05,21), YNameValue = 8, },
+            new ModelChart{ date = new DateTime(2022,05,21), YNameValue = 9, },
+            new ModelChart{ date = new DateTime(2022,05,21), YNameValue = 23, },
+            new ModelChart{ date = new DateTime(2022,05,21), YNameValue = 1, }, //56
+            new ModelChart{ date = new DateTime(2022,05,23), YNameValue = 1, },
+            new ModelChart{ date = new DateTime(2022,05,23), YNameValue = 1, },
+            new ModelChart{ date = new DateTime(2022,05,23), YNameValue = 3, },
+            new ModelChart{ date = new DateTime(2022,05,23), YNameValue = 4, }, //9
+            new ModelChart{ date = new DateTime(2022,05,24), YNameValue = 1, },
+            new ModelChart{ date = new DateTime(2022,05,24), YNameValue = 12, },
+            new ModelChart{ date = new DateTime(2022,05,24), YNameValue = 7, },
+            new ModelChart{ date = new DateTime(2022,05,24), YNameValue = 8, }, //28
+            new ModelChart{ date = new DateTime(2022,05,25), YNameValue = 1, },
+            new ModelChart{ date = new DateTime(2022,05,25), YNameValue = 9, },
+            new ModelChart{ date = new DateTime(2022,05,25), YNameValue = 6, },
+            new ModelChart{ date = new DateTime(2022,05,25), YNameValue = 12, }, //28
+            new ModelChart{ date = new DateTime(2022,05,26), YNameValue = 3, },
+            new ModelChart{ date = new DateTime(2022,05,26), YNameValue = 7, },
+            new ModelChart{ date = new DateTime(2022,05,26), YNameValue = 8, },
+            new ModelChart{ date = new DateTime(2022,05,26), YNameValue = 2, }, //20
+            new ModelChart{ date = new DateTime(2022,05,27), YNameValue = 13, },
+            new ModelChart{ date = new DateTime(2022,05,27), YNameValue = 7, },
+            new ModelChart{ date = new DateTime(2022,05,27), YNameValue = 4, },
+            new ModelChart{ date = new DateTime(2022,05,27), YNameValue = 6, },
+            new ModelChart{ date = new DateTime(2022,05,27), YNameValue = 8, },
+            new ModelChart{ date = new DateTime(2022,05,27), YNameValue = 2, }, //40
+        };
+
+        await GetCalendar1();
+
+        this.StateHasChanged();
+    }
+
+    private async Task GetCalendar1()
+    {
+        DateTime? startDate = DateValue?.FirstDayOfWeek();
+        DateTime? endDate = DateValue?.LastSaturdayOfWeek();
+        if (weighsModels != null)
+        {
+            chart1 = weighsModels.Where(d => d.date >= startDate && d.date <= endDate).ToList();
+
+            var groupTotalByDay = from chart in chart1
+                                  group chart by chart.date into ChartData
+                                  select new ModelChart()
+                                      {
+                                          date = ChartData.Key,
+                                          YNameValue = ChartData.Sum(x => x.YNameValue),
+                                      };
+            chart1 = groupTotalByDay.ToList();
+
+            this.StateHasChanged();
+        }
+    }
+
+    private async Task GetCalendar2()
+    {
+        if (weighsModels != null)
+        {
+            chart1 = weighsModels.Where(d => d.date >= MinDate && d.date <= MaxDate).ToList();
+
+            var groupTotalByDay = from chart in chart1
+
+                                  group chart by chart.date into ChartData
+                                  select new ModelChart()
+                                      {
+                                          date = ChartData.Key,
+                                          YNameValue = ChartData.Sum(x => x.YNameValue),
+                                      };
+            chart1 = groupTotalByDay.ToList();
+
+            var dayOfWeek = weighsModels.Select(d => d.DayOfWeekValue);
+        }
+        this.StateHasChanged();
+    }
+
+    //datePicker1
+    public async void ValueChangeHandlerAsync(ChangedEventArgs<DateTime?> args)
+    {
+        await this.DateObj.ShowPopupAsync();
+        DateValue = DateObj?.Value;
+
+        await GetCalendar1();
+        this.StateHasChanged();
+    }
+
+    //datePicker2
+    public async void FocusHandler(Syncfusion.Blazor.Calendars.FocusEventArgs args)
+    {
+        await this.DateObjStat.ShowPopupAsync();
+    }
+
+    //datePicker2
+    public async void BlurHandlerAsync()
+    {
+        //And when user UNfocused, i call some function with TWO dates value set
+        if ((MinDate != null) & (MaxDate != null))
+        {
+            await GetCalendar2();
+        }
+        else { await GetCalendar1(); }
+
+        await this.DateObjStat.HidePopupAsync();
+
+        this.StateHasChanged();
+    }
+
+    //datePicker2
+    public void RangeSelectHandler(RangePickerEventArgs<DateTime?> args)
+    {
+        if ((args.StartDate != null) && (args.EndDate != null))
+        {
+            MinDate = args.StartDate;
+            MaxDate = args.EndDate;
+        }
+        else
+        {
+            MinDate = null;
+            MaxDate = null;
+        }
+    }
+
+    public class ModelChart
+    {
+        public string someVal1 { get; set; }
+        public string someVal2 { get; set; }
+        public bool someVal3 { get; set; }
+        public DateTime date { get; set; }
+
+        public string XNameValue { get; set; }
+        public int YNameValue { get; set; }
+        public int SomeValueTest { get; set; }
+        private DayOfWeek dayOfWeekValue { get; set; }
+        public DayOfWeek DayOfWeekValue { get => date.DayOfWeek; set { dayOfWeekValue = value; } }
+    }
+}
