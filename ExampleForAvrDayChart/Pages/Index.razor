@@ -39,13 +39,13 @@ else
     </SfChart>*@
 
     <SfChart Title="Some title" Height="250">
-        <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category" EdgeLabelPlacement="EdgeLabelPlacement.Shift">
+        <ChartPrimaryXAxis LabelFormat="dddd" ValueType="Syncfusion.Blazor.Charts.ValueType.DateTimeCategory" EdgeLabelPlacement="EdgeLabelPlacement.Shift">
 
         </ChartPrimaryXAxis>
         <ChartTooltipSettings Enable="true">
         </ChartTooltipSettings>
         <ChartSeriesCollection>
-            <ChartSeries DataSource="@chart1" XName="DayOfWeekValue" YName="YNameValue" Type="ChartSeriesType.Line" Fill="#8A2336">
+            <ChartSeries DataSource="@chart1" XName="date" YName="YNameValue" Type="ChartSeriesType.Line" Fill="#8A2336">
                 <ChartMarker>
                     <ChartDataLabel Visible="true" Position="Syncfusion.Blazor.Charts.LabelPosition.Top">
                         <ChartDataLabelFont FontWeight="800" Color="#142147"></ChartDataLabelFont>
@@ -172,15 +172,26 @@ else
 
             var groupTotalByDay = from chart in chart1
 
-                                  group chart by chart.date into ChartData
+                                  group chart by chart.date.DayOfWeek into ChartData
                                   select new ModelChart()
                                       {
-                                          date = ChartData.Key,
+                                          date = ConvertDateTime(ChartData.Key),
                                           YNameValue = ChartData.Sum(x => x.YNameValue),
                                       };
             chart1 = groupTotalByDay.ToList();
         }
         this.StateHasChanged();
+    }
+
+    private DateTime ConvertDateTime(DayOfWeek dayOfWeek)
+    {
+        DateTime date = DateTime.Now;
+        int diff = dayOfWeek - date.DayOfWeek;
+        if (diff < 0)
+        {
+            diff += 7;
+        }
+        return date.AddDays(diff);
     }
 
     //datePicker1
